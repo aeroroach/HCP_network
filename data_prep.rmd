@@ -1,0 +1,89 @@
+---
+title: "Network Data Preparation"
+author: "Pitchayen S."
+date: "25/5/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+Sys.setlocale("LC_ALL", "th_TH.utf8")
+Sys.setenv(R_CONFIG_ACTIVE = "production")
+```
+
+## Prerequisite
+
+Create the reproducible environment
+
+```{r}
+# renv::init()
+# renv::snapshot()
+```
+
+Library loading
+
+```{r lib_loading}
+library(data.table)
+library(dtplyr)
+library(tidyverse)
+library(lubridate)
+library(tidygraph)
+library(pins)
+```
+
+Function loading
+
+```{r connection}
+source("func/conn.R")
+source("func/utility.R")
+```
+
+## Data Loading
+
+```{r data_load}
+source("func/data_load.R")
+
+glimpse(event_select)
+```
+
+```{r eif_str}
+glimpse(event_eif)
+```
+
+```{r sym_str}
+glimpse(event_sym)
+```
+
+
+```{r speaker_str}
+glimpse(speaker_prof_tbl)
+```
+
+
+## Transformation
+
+```{r transform}
+source("func/data_transform.R")
+```
+
+## Graph object
+
+```{r graph}
+source("func/data_graph.R")
+```
+
+## Writing output
+
+```{r output}
+source("func/output_pin.R")
+```
+
+
+## Closing redshift connection
+
+```{r discon}
+DBI::dbDisconnect(con)
+
+rm(list = ls())
+gc()
+```

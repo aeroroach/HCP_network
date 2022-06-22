@@ -1,0 +1,84 @@
+cust_main_specialty_code,cust_2nd_specialty_code,cust_main_specialty_regroup,cust_2nd_specialty_regroup
+Anesthesiology,None,Anesthesiology,None
+Cardiology,Internal Medicine,Internal Medicine,Cardiology
+Cardiology,None,Internal Medicine,Cardiology
+Dentist,None,Dentist,None
+Dentist,Pediatrics,Dentist,Pediatrics
+Emergency Medicine,None,Emergency Medicine,None
+Endocrin Diabetes/Metabolism,None,Internal Medicine,Endocrinology
+Endocrinology,Internal Medicine,Internal Medicine,Endocrinology
+Family Med/General Practice,General Practice,Family Med/General Practice,None
+Family Med/General Practice,None,Family Med/General Practice,None
+Family Med/General Practice,Occupational Therapist,Internal Medicine,Occupational Therapist
+Family Med/General Practice,Public Health,Internal Medicine,Public Health
+General Surgery,Cardiothoracic/ Thoracic Surgery,General Surgery,Cardiothoracic/ Thoracic Surgery
+General Surgery,Cardiovasc./Vascular Surgery,General Surgery,Cardiothoracic/ Thoracic Surgery
+General Surgery,Colorectal Surgeon,General Surgery,Colorectal Surgeon
+General Surgery,Day Surgery,General Surgery,None
+General Surgery,None,General Surgery,None
+General Surgery,Neurosurgery,General Surgery,Neurosurgery
+General Surgery,Pediatric Surgery,Pediatrics,Pediatric Surgery
+General Surgery,Plastic & Reconstructive Surgery,General Surgery,Plastic & Reconstructive Surgery
+General Surgery,Urology/Urology Surgery,General Surgery,Urology/Urology Surgery
+Hematology,None,Internal Medicine,Haematology
+Infectious Diseases,None,Internal Medicine,Infectious Diseases
+Internal Medicine,Cardiology,Internal Medicine,Cardiology
+Internal Medicine,Dermatology,Internal Medicine,Dermatology
+Internal Medicine,Endocrinology,Internal Medicine,Endocrinology
+Internal Medicine,Gastroenterology,Internal Medicine,Gastroenterology
+Internal Medicine,Geriatrics,Internal Medicine,Geriatrics
+Internal Medicine,Haematology,Internal Medicine,Haematology
+Internal Medicine,Immunology,Internal Medicine,Immunology
+Internal Medicine,Infectious Diseases,Internal Medicine,Infectious Diseases
+Internal Medicine,None,Internal Medicine,None
+Internal Medicine,Nephrology,Internal Medicine,Nephrology
+Internal Medicine,Neurology,Internal Medicine,Neurology
+Internal Medicine,Pulmonary Disease,Internal Medicine,Pulmonary Disease
+Internal Medicine,Rheumatology,Internal Medicine,Rheumatology
+Laboratory Medicine,None,Laboratory Medicine,None
+Obstetrics Gynaecology,None,Obstetrics Gynaecology,None
+Obstetrics Gynaecology,Reproductive Health,Obstetrics Gynaecology,Reproductive Health
+Obstetrics Gynaecology,Reproductive Medicine,Obstetrics Gynaecology,Reproductive Health
+Orthopedic Surgery,None,General Surgery,Orthopedic Surgery
+Otorhinolaryngology,None,Otorhinolaryngology,None
+Pathology,None,Pathology,None
+Pediatric Allergy & Immun,None,Pediatrics,Pediatric Allergy & Immun
+Pediatrics,Anesthesiology,Pediatrics,Anesthesiology
+Pediatrics,Dermatology,Pediatrics,Dermatology
+Pediatrics,Developmental,Pediatrics,Developmental
+Pediatrics,Immunology,Pediatrics,Immunology
+Pediatrics,None,Pediatrics,None
+Pediatrics,Neonatology,Pediatrics,Neonatology
+Pediatrics,Nephrology,Pediatrics,Nephrology
+Pediatrics,Pediatric Allergy & Immun,Pediatrics,Pediatric Allergy & Immun
+Pediatrics,Pediatric Cardiology,Pediatrics,Pediatric Cardiology
+Pediatrics,Pediatric Endocrinology,Pediatrics,Pediatric Endocrinology
+Pediatrics,Pediatric Gastroenterology,Pediatrics,Pediatric Gastroenterology
+Pediatrics,Pediatric Infectious Disease,Pediatrics,Pediatric Infectious Disease
+Pediatrics,Pediatric Neurology,Pediatrics,Pediatric Neurology
+Pediatrics,Pediatric Surgery,Pediatrics,Pediatric Surgery
+Pediatrics,Pediatric Pulmonary Disease,Pediatrics,Pediatric Pulmonary Disease
+Psychiatry,Child/Adolescent Psychiatry,Psychiatry,None
+Psychiatry,Internal Medicine,Psychiatry,None
+Psychiatry,None,Psychiatry,None
+Radiology,Emergency Medicine,Radiology,Emergency Medicine
+Radiology,None,Radiology,None
+Radiology,Pediatrics,Radiology,Pediatrics
+Radiology,Radiology Diagnostic,Radiology,Radiology Diagnostic
+Rehabilitation Medicine,None,Rehabilitation Medicine,None
+Urology/Urology Surgery,Urological Surgery,General Surgery,Urology/Urology Surgery
+General Medicine,None,Internal Medicine,None
+General Medicine,Dermatology,Internal Medicine,Dermatology
+Pathology,Anatomic Pathology,Pathology,Anatomic Pathology
+Radiology,Nuclear Medicine Technologist,Radiology,Nuclear Medicine Technologist
+General Practice,None,Family Med/General Practice,None
+Ophthalmology,None,Ophthalmology,None
+Nephrology,None,Internal Medicine,Nephrology
+General Surgery,Oncology Surgery,Oncology,Oncology Surgery
+Internal Medicine,Medical Oncology,Oncology,Medical Oncology
+Obstetrics Gynaecology,Oncology Gynecological,Oncology,Oncology Gynecological
+Pediatrics,Pediatric Hemato-oncology,Oncology,Pediatric Hemato-oncology
+Radiology,Oncology Radiotherapy,Oncology,Oncology Radiotherapy
+Medical Oncologist,None,Oncology,Medical Oncology
+Oncology Gynecological,None,Oncology,Oncology Gynecological
+Internal Medicine,Oncology,Oncology,Medical Oncology

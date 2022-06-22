@@ -1,0 +1,5 @@
+default:
+  board_path: "/th_hh_rstudio/hcp_network/staging"
+  
+production:
+  board_path: "/th_hh_rstudio/hcp_network/"

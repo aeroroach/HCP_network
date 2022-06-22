@@ -1,0 +1,340 @@
+---
+title: "Dev pilot network"
+author: "Pitchayen S."
+date: "12/24/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+Sys.setlocale(locale = "Thai")
+```
+
+## Prerequisite
+
+```{r}
+library(tidyverse)
+
+source("conn.R")
+source("utility.R")
+```
+
+```{r}
+spec_filter <- "Otorhinolaryngology"
+```
+
+
+## Data Preparation
+
+### Extraction
+
+```{r}
+event <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_f_event"))
+
+event %>% 
+  filter(evnt_type %in% c("Small Meeting with External Speaker", 
+                          "Sales Initiated Lecture/Symposium"), 
+         evnt_end_date >= as.Date("2019-01-01"), 
+         evnt_end_date <= as.Date("2021-12-31"), 
+         dm_deleted_flag == "N",
+         dm_current_flag == "Y",) -> event_select
+
+event_speaker <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_f_event_speaker"))
+
+speaker_profile <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_d_speaker"))
+
+speaker_qual <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_d_speaker_qualification"))
+
+event_attendee <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_f_event_attendee"))
+```
+
+Loading customer data
+
+```{r}
+cust <- tbl(con, sql("SELECT * FROM cim_cdm_pub.vw_d_customer"))
+
+cust %>% 
+  filter(cust_status_code_local == "Active", 
+         cust_class_of_trade == "Physician", 
+         dm_deleted_flag == "N", 
+         dm_current_flag == "Y") -> cust
+
+cust_child <- tbl(con, sql("SELECT * FROM cim_lc_pub.vw_c302_009_child_account"))
+
+cust_child %>% 
+  filter(da_deleted_flag == "N") -> cust_child
+```
+
+Selecting relevance data
+
+```{r}
+event_select %>%  
+  filter(evnt_status == "Closed", is.na(parent_evnt_id)) %>% 
+  select(evnt_key, evnt_id, evnt_id, parent_evnt_id, 
+                      evnt_name, evnt_type, evnt_subtype) -> event_select
+
+event_speaker %>% select(evnt_key, spk_key) -> event_speaker
+
+speaker_profile %>% select(spk_key, cust_ak) %>%
+  rename(cust_ak_speaker = cust_ak) -> speaker_profile
+
+speaker_qual %>% select(spk_key, qualf_name) -> speaker_qual
+
+event_attendee %>% 
+  select(cust_ak, evnt_key) %>% 
+  filter(!is.na(cust_ak)) -> event_attendee
+```
+
+```{r}
+cust %>%
+  select(cust_ak, cust_id ,cust_name, cust_veeva_id, cust_main_specialty_code, 
+         cust_prmry_addr_state, cust_prmry_parent_name) -> cust
+
+cust_child %>% 
+  select(child_account_vod, parent_account_vod, primary_vod) -> cust_child
+```
+
+### Event data
+
+#### Joining
+
+Joining data
+
+```{r}
+event_select %>% 
+  left_join(event_speaker, by ="evnt_key") %>% 
+  left_join(speaker_profile, by ="spk_key") %>%
+  left_join(speaker_qual, by ="spk_key") %>% 
+  filter(!is.na(spk_key)) %>% 
+  left_join(cust, by = c("cust_ak_speaker"="cust_ak"), suffix = c("", "_speaker")) %>%
+  left_join(event_attendee, by = "evnt_key") %>%
+  left_join(cust, by = "cust_ak", suffix = c("", "_attendee")) %>% 
+  arrange(evnt_key) %>% 
+  filter(!is.na(cust_id),
+         cust_main_specialty_code_attendee != "Nurse") -> event_select
+
+glimpse(event_select)
+```
+
+```{r}
+event_select %>% 
+  select(!c(evnt_key:evnt_name, evnt_subtype, spk_key, cust_veeva_id, cust_ak, cust_name_attendee,
+           cust_veeva_id_attendee:cust_prmry_parent_name_attendee)) -> event_select
+
+glimpse(event_select)
+```
+
+#### Transforming
+
+Filtering for pilot
+
+```{r}
+event_select %>% 
+  filter(evnt_type == "Small Meeting with External Speaker", 
+         cust_main_specialty_code == spec_filter, 
+         !is.na(cust_id_attendee)) -> small_mtg_joined
+```
+
+Creating event edge list
+
+```{r}
+small_mtg_joined %>% 
+  filter(!is.na(cust_id_attendee)) %>% 
+  select(from = cust_id_attendee, to = cust_id) %>% 
+  mutate(init_weight = 10) %>% 
+  group_by(from, to) %>% 
+  summarise(weight = sum(init_weight)) %>% 
+  collect() -> event_edge_list
+```
+
+Creating speaker profile table
+
+```{r}
+event_select %>%
+  filter(cust_main_specialty_code == spec_filter) %>% 
+  select(cust_id, cust_name, qualf_name, cust_main_specialty_code, cust_prmry_addr_state, cust_prmry_parent_name) %>% 
+  distinct() %>% 
+  collect() -> speaker_prof_tbl 
+```
+
+
+### HCO correlation
+
+#### Joining child hco
+
+```{r}
+cust %>% 
+  filter(cust_main_specialty_code == spec_filter) -> cust_filter
+
+cust_filter %>% 
+  inner_join(cust_child, by = c("cust_veeva_id"="child_account_vod")) %>% 
+  arrange(cust_id) -> cust_filter
+
+glimpse(cust_filter)
+```
+
+#### Joining relationship
+
+```{r}
+cust_filter %>% 
+  select(cust_id, cust_main_specialty_code, parent_account_vod, primary_vod) %>% 
+  rename(cust_id_to = cust_id) -> hcp_to
+
+cust_filter %>% 
+  select(cust_id, cust_main_specialty_code, parent_account_vod) %>% 
+  rename(cust_id_from = cust_id) -> hcp_from
+```
+
+```{r}
+hcp_from %>% 
+  left_join(hcp_to, by = c("cust_main_specialty_code", "parent_account_vod")) %>% 
+  filter(cust_id_from != cust_id_to) -> hcp_network
+```
+
+#### Transformation
+
+```{r}
+hcp_network %>% 
+  mutate(init_weight = ifelse(primary_vod == "Yes", 3, 1)) %>% 
+  select(from = cust_id_from, to = cust_id_to, init_weight) %>% 
+  group_by(from, to) %>% 
+  summarise(weight = sum(init_weight)) %>% 
+  collect() -> hcp_edge
+```
+### Combined data
+
+#### Edge list
+
+```{r}
+edge_list <- bind_rows(event_edge_list ,hcp_edge)
+
+edge_list %>% 
+  group_by(from, to) %>% 
+  summarise(weight = sum(weight)) -> edge_list
+```
+### Node list
+
+```{r}
+cust %>%
+  filter(cust_main_specialty_code == spec_filter) %>% 
+  select(!c(cust_ak, cust_veeva_id)) %>%
+  rename(id = cust_id, label = cust_name, title = cust_prmry_parent_name) %>% 
+  collect() -> node_list
+```
+
+Mapping with speaker list
+
+```{r}
+speaker_prof_tbl %>% 
+  select(id = cust_id) %>% 
+  mutate(group = "Speaker") -> spk_flag
+
+node_list %>% 
+  left_join(spk_flag, by = "id") %>% 
+  mutate(group = ifelse(is.na(group),"None", group)) -> node_list
+```
+
+### Filtering invalid hcp
+
+```{r}
+edge_list %>% 
+  semi_join(node_list, by = c("from"="id")) %>% 
+  semi_join(node_list, by = c("to"="id")) -> edge_list
+```
+
+
+## Graph
+
+```{r}
+library(tidygraph)
+library(visNetwork)
+```
+
+### Converting into tidygraph object
+
+```{r}
+route_hcp <- tbl_graph(nodes = node_list, edges = edge_list,
+                       node_key = "id",
+                       directed = T)
+
+route_hcp %>% 
+  activate(nodes) %>% 
+  mutate(eigen = round(centrality_eigen() * 100, digits = 2), 
+         degree = centrality_degree(), 
+         betweeness = centrality_betweenness()) -> route_hcp
+```
+
+Mapping the speaker profile
+
+```{r}
+route_hcp %>% 
+  activate(nodes) %>% 
+  as_tibble() %>% 
+  filter(group == "Speaker") %>% 
+  select(cust_id = id, eigen:betweeness) -> score_mapping
+
+speaker_prof_tbl %>% 
+  left_join(score_mapping, by = "cust_id") -> speaker_prof_tbl
+
+speaker_prof_tbl
+
+write_csv(speaker_prof_tbl, "output/speaker_prof_tbl.csv")
+
+saveRDS(route_hcp, "output/hcp_graph_obj.RDS")
+```
+
+Writing Node list without speaker
+
+```{r}
+route_hcp %>% 
+  activate(nodes) %>% 
+  as_tibble() %>% 
+  filter(group == "None") %>%
+  write_csv("output/node_non_speaker.csv")
+```
+
+
+### Plotting the distribution
+
+```{r}
+route_hcp %>% 
+  activate(nodes) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = eigen)) + geom_histogram()
+```
+
+```{r}
+route_hcp %>% 
+  activate(nodes) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = degree)) + geom_histogram()
+```
+
+```{r}
+route_hcp %>% 
+  activate(nodes) %>% 
+  as_tibble() %>% 
+  ggplot(aes(x = betweeness)) + geom_histogram()
+```
+
+
+### Graph plotting
+
+```{r}
+vis_tidy_graph_filter(route_hcp, eigen, 100)
+```
+
+```{r}
+vis_tidy_graph_filter(route_hcp, betweeness, 100)
+```
+
+```{r}
+vis_tidy_graph_filter(route_hcp, degree, 100)
+```
+
+## Closing redshift connection
+
+```{r}
+DBI::dbDisconnect(con)
+
+```

@@ -1,5 +1,7 @@
 # HCP Network Graph
 
+![alt text](https://user-images.githubusercontent.com/24812908/176720814-2bcc1fbc-4977-4a45-bdea-383601203173.png)
+
 Utilizing HCP data profile to infer the relationship of each Health Care Providers
 
 The interesting approach of this project is listed below.
